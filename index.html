@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MK One</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b0f14;
+  --card:#111826;
+  --border:rgba(255,255,255,0.10);
+  --text:rgba(255,255,255,0.92);
+  --muted:rgba(255,255,255,0.65);
+  --input-bg:rgba(255,255,255,0.06);
+  --shadow:0 18px 50px rgba(0,0,0,0.45);
+  --focus:rgba(0,194,106,0.35);
+  --accent:#00c26a;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  font-family:'Google Sans',sans-serif;
+  background:
+    radial-gradient(1200px 700px at 20% 0%, rgba(0,194,106,0.10), transparent 55%),
+    radial-gradient(900px 600px at 80% 10%, rgba(120,120,255,0.10), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+.container{
+  position:relative;
+  width:min(620px,100%);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), transparent 50%),
+    var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:18px;
+  overflow:hidden;
+}
+
+/* Top bar */
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:16px;
+}
+
+.hamburger{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--input-bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background 150ms ease;
+}
+.hamburger:hover{background:rgba(255,255,255,0.10)}
+.hamburger svg{width:18px;height:18px}
+
+h2{
+  margin:0;
+  font-family:'Fraunces', serif;
+  font-size:22px;
+  font-weight:600;
+}
+
+/* Search - pill shaped, Google style */
+.search{margin-bottom:20px}
+
+.search-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+  width:100%;
+  background:var(--input-bg);
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:0 16px;
+  transition:border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.search-wrap:focus-within{
+  border-color:rgba(0,194,106,0.6);
+  box-shadow:0 0 0 4px var(--focus);
+}
+
+.search-wrap svg{
+  width:18px;
+  height:18px;
+  flex-shrink:0;
+  color:var(--muted);
+}
+
+.search-wrap input{
+  flex:1;
+  width:100%;
+  padding:12px 10px;
+  font-size:15px;
+  font-weight:500;
+  background:transparent;
+  color:var(--text);
+  border:none;
+  outline:none;
+  font-family:inherit;
+}
+
+.search-wrap input::placeholder{color:var(--muted)}
+
+/* App grid */
+.app-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:28px 18px;
+}
+
+.app{text-align:center; display:block}
+
+.icon-tile{
+  width:68px;
+  height:68px;
+  border-radius:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto;
+  font-size:26px;
+  font-weight:700;
+  color:#fff;
+  transition:transform 180ms ease, box-shadow 180ms ease;
+}
+
+.icon-tile:hover{
+  transform:scale(1.06);
+  box-shadow:0 10px 24px rgba(0,0,0,0.45);
+}
+
+.app-label{
+  margin-top:8px;
+  font-size:13px;
+  font-weight:600;
+  line-height:1.25;
+  color:var(--text);
+}
+
+a{text-decoration:none;color:inherit}
+
+.empty-msg{
+  grid-column:1/-1;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+  padding:20px 0;
+}
+
+/* Mobile */
+@media(max-width:520px){
+  .app-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ===== Sidebar ===== */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 220ms ease;
+  z-index:40;
+}
+.overlay.open{opacity:1; pointer-events:auto}
+
+.sidebar{
+  position:fixed;
+  top:0;
+  left:0;
+  height:100%;
+  width:250px;
+  background:var(--card);
+  border-right:1px solid var(--border);
+  transform:translateX(-100%);
+  transition:transform 240ms ease;
+  z-index:50;
+  padding:18px;
+}
+.sidebar.open{transform:translateX(0)}
+
+.sidebar-title{
+  font-size:16px;
+  font-weight:700;
+  margin-bottom:18px;
+  color:var(--text);
+}
+
+.sidebar-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  color:var(--text);
+  transition:background 150ms ease;
+}
+.sidebar-item:hover{background:rgba(255,255,255,0.08)}
+.sidebar-item svg{width:18px;height:18px;color:var(--muted)}
+
+/* ===== Archive panel ===== */
+.archive-panel{
+  position:fixed;
+  top:0;
+  right:0;
+  height:100%;
+  width:100%;
+  max-width:620px;
+  background:var(--bg);
+  transform:translateX(100%);
+  transition:transform 260ms ease;
+  z-index:45;
+  overflow-y:auto;
+  padding:18px;
+}
+.archive-panel.open{transform:translateX(0)}
+
+.archive-topbar{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.back-btn{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--input-bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.back-btn svg{width:18px;height:18px}
+
+.fab{
+  position:fixed;
+  bottom:26px;
+  right:26px;
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#06130c;
+  border:none;
+  font-size:26px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,194,106,0.35);
+  z-index:46;
+  transition:transform 150ms ease;
+}
+.fab:hover{transform:scale(1.06)}
+
+.remove-badge{
+  position:absolute;
+  top:-6px;
+  right:calc(50% - 34px);
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#e0453c;
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border:2px solid var(--bg);
+}
+.archive-app{position:relative}
+
+/* ===== Picker modal ===== */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:60;
+}
+.modal-overlay.open{display:flex}
+
+.modal{
+  width:min(620px,100%);
+  max-height:70vh;
+  overflow-y:auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px 18px 0 0;
+  padding:18px;
+}
+
+.modal-title{
+  font-size:16px;
+  font-weight:700;
+  margin-bottom:14px;
+}
+
+.picker-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 6px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.picker-row:hover{background:rgba(255,255,255,0.06)}
+
+.picker-icon{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#fff;
+  font-size:15px;
+  flex-shrink:0;
+}
+
+.picker-name{font-size:14px; font-weight:600; flex:1}
+
+.picker-check{
+  width:20px;
+  height:20px;
+  border-radius:6px;
+  border:1.5px solid var(--border);
+  flex-shrink:0;
+}
+.picker-row.selected .picker-check{
+  background:var(--accent);
+  border-color:var(--accent);
+}
+
+.modal-done{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:#06130c;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="container">
+  <div class="topbar">
+    <div class="hamburger" id="hamburgerBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </div>
+    <h2>MK One</h2>
+  </div>
+
+  <div class="search">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search" placeholder="Search apps…" oninput="renderMain()">
+    </div>
+  </div>
+
+  <div class="app-grid" id="mainGrid"></div>
+</div>
+
+<!-- Sidebar -->
+<div class="overlay" id="overlay"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-title">Menu</div>
+  <div class="sidebar-item" id="archiveNavBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+    Archive
+  </div>
+</div>
+
+<!-- Archive panel -->
+<div class="archive-panel" id="archivePanel">
+  <div class="archive-topbar">
+    <div class="back-btn" id="archiveBackBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </div>
+    <h2>Archive</h2>
+  </div>
+  <div class="app-grid" id="archiveGrid"></div>
+</div>
+
+<button class="fab" id="fabBtn" style="display:none">+</button>
+
+<!-- Picker modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Add to Archive</div>
+    <div id="pickerList"></div>
+    <button class="modal-done" id="modalDoneBtn">Done</button>
+  </div>
+</div>
+
+<script>
+const APPS = [
+  { id:"details-copy",   name:"Details Copy",     url:"https://kariyala.github.io/details-copy/" },
+  { id:"price-per-unit", name:"Price Per Unit",   url:"https://kariyala.github.io/price-per-unit/" },
+  { id:"hst",            name:"HST",              url:"https://kariyala.github.io/hst/" },
+  { id:"calculator-h",   name:"Calculator-H",     url:"https://kariyala.github.io/calculator-h/" },
+  { id:"yt-timestamp",   name:"YT Timestamp",     url:"https://kariyala.github.io/yt/yttsl/" },
+  { id:"yt-thumbnail",   name:"YT Thumbnail",     url:"https://kariyala.github.io/yt/ythumb/" },
+  { id:"yt-embed",       name:"YT Embed",         url:"https://kariyala.github.io/yt/ytembed/" },
+  { id:"currency",       name:"Currency Exchange",url:"https://kariyala.github.io/exchange-rate/" },
+  { id:"tally",          name:"Tally Counter",    url:"https://kariyala.github.io/tally-counter/" },
+  { id:"debt",           name:"Debt Calculator",  url:"https://kariyala.github.io/debt-calculator/" }
+];
+
+const COLORS = ["#3b6fe0","#e0533b","#3bab6e","#a15be0","#e0a53b","#3bc0c2","#e0468f","#7a8bde","#5bb8e0","#c2913b"];
+function colorFor(id){
+  let sum = 0;
+  for(let i=0;i<id.length;i++) sum += id.charCodeAt(i);
+  return COLORS[sum % COLORS.length];
+}
+
+let archived = JSON.parse(localStorage.getItem("mk_archived") || "[]");
+function saveArchived(){ localStorage.setItem("mk_archived", JSON.stringify(archived)); }
+
+function appTile(app, opts){
+  opts = opts || {};
+  const badge = opts.removable
+    ? `<div class="remove-badge" data-id="${app.id}">×</div>`
+    : "";
+  return `
+    <div class="app ${opts.removable ? 'archive-app' : ''}">
+      ${badge}
+      <a href="${app.url}" target="_blank">
+        <div class="icon-tile" style="background:${colorFor(app.id)}">${app.name.charAt(0).toUpperCase()}</div>
+        <div class="app-label">${app.name}</div>
+      </a>
+    </div>`;
+}
+
+function updateGridMinHeight(){
+  const grid = document.getElementById("mainGrid");
+  const visible = APPS.filter(a => !archived.includes(a.id));
+  grid.style.minHeight = "";
+  grid.innerHTML = visible.length
+    ? visible.map(a => appTile(a)).join("")
+    : `<div class="empty-msg">No apps found</div>`;
+  grid.style.minHeight = grid.scrollHeight + "px";
+}
+
+function renderMain(){
+  const query = document.getElementById("search").value.trim();
+  const firstChar = query.charAt(0).toLowerCase();
+  const visible = APPS.filter(a => !archived.includes(a.id));
+  const filtered = query
+    ? visible.filter(a => a.name.charAt(0).toLowerCase() === firstChar)
+    : visible;
+
+  const grid = document.getElementById("mainGrid");
+  grid.innerHTML = filtered.length
+    ? filtered.map(a => appTile(a)).join("")
+    : `<div class="empty-msg">No apps found</div>`;
+}
+
+let resizeTimer;
+window.addEventListener("resize", ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{
+    updateGridMinHeight();
+    renderMain();
+  }, 150);
+});
+
+function renderArchive(){
+  const grid = document.getElementById("archiveGrid");
+  const items = APPS.filter(a => archived.includes(a.id));
+  grid.innerHTML = items.map(a => appTile(a, { removable:true })).join("");
+
+  grid.querySelectorAll(".remove-badge").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.getAttribute("data-id");
+      archived = archived.filter(x => x !== id);
+      saveArchived();
+      renderArchive();
+      updateGridMinHeight();
+      renderMain();
+    });
+  });
+}
+
+/* Sidebar */
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+document.getElementById("hamburgerBtn").addEventListener("click", ()=>{
+  sidebar.classList.add("open");
+  overlay.classList.add("open");
+});
+overlay.addEventListener("click", ()=>{
+  sidebar.classList.remove("open");
+  overlay.classList.remove("open");
+});
+
+/* Archive panel */
+const archivePanel = document.getElementById("archivePanel");
+const fabBtn = document.getElementById("fabBtn");
+document.getElementById("archiveNavBtn").addEventListener("click", ()=>{
+  sidebar.classList.remove("open");
+  overlay.classList.remove("open");
+  renderArchive();
+  archivePanel.classList.add("open");
+  fabBtn.style.display = "flex";
+});
+document.getElementById("archiveBackBtn").addEventListener("click", ()=>{
+  archivePanel.classList.remove("open");
+  fabBtn.style.display = "none";
+});
+
+/* Picker modal */
+const modalOverlay = document.getElementById("modalOverlay");
+let selectedForArchive = [];
+
+fabBtn.addEventListener("click", ()=>{
+  selectedForArchive = [];
+  const available = APPS.filter(a => !archived.includes(a.id));
+  const list = document.getElementById("pickerList");
+  list.innerHTML = available.length
+    ? available.map(a => `
+        <div class="picker-row" data-id="${a.id}">
+          <div class="picker-icon" style="background:${colorFor(a.id)}">${a.name.charAt(0).toUpperCase()}</div>
+          <div class="picker-name">${a.name}</div>
+          <div class="picker-check"></div>
+        </div>`).join("")
+    : `<div class="empty-msg">All apps are already archived</div>`;
+
+  list.querySelectorAll(".picker-row").forEach(row=>{
+    row.addEventListener("click", ()=>{
+      const id = row.getAttribute("data-id");
+      row.classList.toggle("selected");
+      if(selectedForArchive.includes(id)){
+        selectedForArchive = selectedForArchive.filter(x => x !== id);
+      } else {
+        selectedForArchive.push(id);
+      }
+    });
+  });
+
+  modalOverlay.classList.add("open");
+});
+
+document.getElementById("modalDoneBtn").addEventListener("click", ()=>{
+  if(selectedForArchive.length){
+    archived = [...new Set([...archived, ...selectedForArchive])];
+    saveArchived();
+    renderArchive();
+    updateGridMinHeight();
+    renderMain();
+  }
+  modalOverlay.classList.remove("open");
+});
+
+modalOverlay.addEventListener("click", (e)=>{
+  if(e.target === modalOverlay) modalOverlay.classList.remove("open");
+});
+
+updateGridMinHeight();
+renderMain();
+</script>
+
+</body>
+</html>
