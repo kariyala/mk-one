@@ -83,6 +83,27 @@ h2{
   font-weight:600;
 }
 
+.brand-link{
+  display:inline-block;
+  text-decoration:none;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  outline:none;
+  cursor:pointer;
+}
+
+.brand-title{
+  margin:0;
+  font-family:'Fraunces', serif;
+  font-size:26px;
+  font-weight:600;
+  color:beige;
+  letter-spacing:0.2px;
+}
+
 /* Search - pill shaped, Google style */
 .search{margin-bottom:20px}
 
@@ -174,8 +195,20 @@ a{text-decoration:none;color:inherit}
 
 /* Mobile */
 @media(max-width:520px){
-  .app-grid{grid-template-columns:repeat(2,1fr)}
+  .app-grid{grid-template-columns:repeat(3,1fr); gap:22px 10px}
+  .icon-tile{width:58px; height:58px; font-size:22px; border-radius:14px}
+  .app-label{font-size:12px}
 }
+
+/* Row-limited scrolling (applied dynamically via inline max-height) */
+.app-grid{
+  overflow-y:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,0.25) transparent;
+}
+.app-grid::-webkit-scrollbar{width:6px}
+.app-grid::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25); border-radius:3px}
+.app-grid::-webkit-scrollbar-track{background:transparent}
 
 /* ===== Sidebar ===== */
 .overlay{
@@ -194,15 +227,28 @@ a{text-decoration:none;color:inherit}
   top:0;
   left:0;
   height:100%;
-  width:250px;
+  width:280px;
   background:var(--card);
   border-right:1px solid var(--border);
   transform:translateX(-100%);
   transition:transform 240ms ease;
   z-index:50;
   padding:18px;
+  display:flex;
+  flex-direction:column;
 }
 .sidebar.open{transform:translateX(0)}
+
+@media(max-width:520px){
+  .sidebar{width:85vw; max-width:300px}
+}
+
+.sidebar-view{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  min-height:0;
+}
 
 .sidebar-title{
   font-size:16px;
@@ -226,34 +272,20 @@ a{text-decoration:none;color:inherit}
 .sidebar-item:hover{background:rgba(255,255,255,0.08)}
 .sidebar-item svg{width:18px;height:18px;color:var(--muted)}
 
-/* ===== Archive panel ===== */
-.archive-panel{
-  position:fixed;
-  top:0;
-  right:0;
-  height:100%;
-  width:100%;
-  max-width:620px;
-  background:var(--bg);
-  transform:translateX(100%);
-  transition:transform 260ms ease;
-  z-index:45;
-  overflow-y:auto;
-  padding:18px;
-}
-.archive-panel.open{transform:translateX(0)}
-
-.archive-topbar{
+/* ===== Archive (inside sidebar, left side) ===== */
+.sidebar-archive-header{
   display:flex;
   align-items:center;
-  gap:14px;
-  margin-bottom:20px;
+  gap:10px;
+  margin-bottom:16px;
+  flex-shrink:0;
 }
+.sidebar-archive-header .sidebar-title{margin:0; flex:1}
 
-.back-btn{
-  width:38px;
-  height:38px;
-  border-radius:10px;
+.icon-btn{
+  width:34px;
+  height:34px;
+  border-radius:9px;
   border:1px solid var(--border);
   background:var(--input-bg);
   display:flex;
@@ -261,49 +293,123 @@ a{text-decoration:none;color:inherit}
   justify-content:center;
   cursor:pointer;
   flex-shrink:0;
+  transition:background 150ms ease;
 }
-.back-btn svg{width:18px;height:18px}
+.icon-btn:hover{background:rgba(255,255,255,0.10)}
+.icon-btn svg{width:16px;height:16px}
 
-.fab{
-  position:fixed;
-  bottom:26px;
-  right:26px;
-  width:54px;
-  height:54px;
-  border-radius:50%;
-  background:var(--accent);
-  color:#06130c;
-  border:none;
-  font-size:26px;
-  font-weight:700;
+.archive-list{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  overflow-y:auto;
+  flex:1;
+  min-height:0;
+  margin:0 -8px;
+}
+
+.archive-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  border-radius:10px;
+  position:relative;
+  transition:background 150ms ease;
+}
+.archive-row:hover,
+.archive-row.show-dots{background:rgba(255,255,255,0.06)}
+
+.icon-tile-sm{
+  width:38px;
+  height:38px;
+  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  cursor:pointer;
-  box-shadow:0 10px 24px rgba(0,194,106,0.35);
-  z-index:46;
-  transition:transform 150ms ease;
-}
-.fab:hover{transform:scale(1.06)}
-
-.remove-badge{
-  position:absolute;
-  top:-6px;
-  right:calc(50% - 34px);
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:#e0453c;
+  font-size:15px;
+  font-weight:700;
   color:#fff;
-  font-size:13px;
-  font-weight:700;
+  flex-shrink:0;
+  box-shadow:0 6px 14px rgba(0,0,0,0.35);
+}
+
+.archive-row-name{
+  flex:1;
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--text);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+}
+
+.archive-dots{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--text);
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  border:2px solid var(--bg);
+  flex-shrink:0;
+  z-index:2;
+  opacity:0;
+  transform:scale(1);
+  transition:opacity 150ms ease, transform 150ms ease, background 150ms ease;
 }
-.archive-app{position:relative}
+.archive-row:hover .archive-dots,
+.archive-row.show-dots .archive-dots{opacity:1}
+
+/* Hover directly on the 3 dots: shrink dot + its circle, no fading */
+.archive-dots:hover{
+  transform:scale(0.82);
+  background:rgba(255,255,255,0.16);
+}
+.archive-dots svg{width:13px;height:13px}
+
+.empty-archive{
+  color:var(--muted);
+  font-size:13px;
+  padding:16px 8px;
+  text-align:center;
+}
+
+/* Options popover — always rendered sideways of the row it belongs to,
+   positioned with JS (fixed) so it is never clipped by any scroll container */
+.archive-popover{
+  position:fixed;
+  min-width:120px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  padding:6px;
+  display:none;
+  flex-direction:column;
+  z-index:80;
+  text-align:left;
+}
+.archive-popover.open{display:flex}
+
+.archive-popover button{
+  background:transparent;
+  border:none;
+  color:var(--text);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:600;
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:left;
+}
+.archive-popover button:hover{background:rgba(255,255,255,0.08)}
+.archive-popover button.danger{color:#e0685f}
 
 /* ===== Picker modal ===== */
 .modal-overlay{
@@ -392,7 +498,9 @@ a{text-decoration:none;color:inherit}
     <div class="hamburger" id="hamburgerBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </div>
-    <h2>MK One</h2>
+    <a class="brand-link" id="brandLink" href="https://kariyala.github.io/mk-one/" draggable="false">
+      <h2 class="brand-title">MK One</h2>
+    </a>
   </div>
 
   <div class="search">
@@ -408,25 +516,37 @@ a{text-decoration:none;color:inherit}
 <!-- Sidebar -->
 <div class="overlay" id="overlay"></div>
 <div class="sidebar" id="sidebar">
-  <div class="sidebar-title">Menu</div>
-  <div class="sidebar-item" id="archiveNavBtn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-    Archive
-  </div>
-</div>
 
-<!-- Archive panel -->
-<div class="archive-panel" id="archivePanel">
-  <div class="archive-topbar">
-    <div class="back-btn" id="archiveBackBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  <!-- Menu view -->
+  <div class="sidebar-view" id="sidebarMenuView">
+    <div class="sidebar-title">Menu</div>
+    <div class="sidebar-item" id="archiveNavBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+      Archive
     </div>
-    <h2>Archive</h2>
   </div>
-  <div class="app-grid" id="archiveGrid"></div>
+
+  <!-- Archive view (stays inside the left sidebar) -->
+  <div class="sidebar-view" id="sidebarArchiveView" style="display:none">
+    <div class="sidebar-archive-header">
+      <div class="icon-btn" id="archiveBackBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </div>
+      <div class="sidebar-title">Archive</div>
+      <div class="icon-btn" id="archiveAddBtn" aria-label="Add to archive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+    </div>
+    <div class="archive-list" id="archiveList"></div>
+  </div>
+
 </div>
 
-<button class="fab" id="fabBtn" style="display:none">+</button>
+<!-- Options popover for an archived app (Open / Remove) -->
+<div class="archive-popover" id="archivePopover">
+  <button type="button" data-action="open">Open</button>
+  <button type="button" class="danger" data-action="remove">Remove</button>
+</div>
 
 <!-- Picker modal -->
 <div class="modal-overlay" id="modalOverlay">
@@ -461,19 +581,50 @@ function colorFor(id){
 let archived = JSON.parse(localStorage.getItem("mk_archived") || "[]");
 function saveArchived(){ localStorage.setItem("mk_archived", JSON.stringify(archived)); }
 
-function appTile(app, opts){
-  opts = opts || {};
-  const badge = opts.removable
-    ? `<div class="remove-badge" data-id="${app.id}">×</div>`
-    : "";
+function appTile(app){
   return `
-    <div class="app ${opts.removable ? 'archive-app' : ''}">
-      ${badge}
+    <div class="app">
       <a href="${app.url}" target="_blank">
         <div class="icon-tile" style="background:${colorFor(app.id)}">${app.name.charAt(0).toUpperCase()}</div>
         <div class="app-label">${app.name}</div>
       </a>
     </div>`;
+}
+
+function archiveRow(app){
+  return `
+    <div class="archive-row" data-id="${app.id}">
+      <div class="icon-tile-sm" style="background:${colorFor(app.id)}">${app.name.charAt(0).toUpperCase()}</div>
+      <div class="archive-row-name">${app.name}</div>
+      <div class="archive-dots" data-dots data-id="${app.id}" aria-label="Options">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+      </div>
+    </div>`;
+}
+
+/* Cap grid height to 4 rows; extra rows scroll (desktop + mobile) */
+function applyRowScroll(grid, maxRows){
+  maxRows = maxRows || 4;
+  grid.style.maxHeight = "";
+  grid.style.overflowY = "hidden";
+
+  const items = Array.from(grid.children).filter(el => el.classList.contains("app"));
+  if(items.length === 0) return;
+
+  const firstTop = items[0].offsetTop;
+  let perRow = 0;
+  for(const it of items){
+    if(Math.round(it.offsetTop) === Math.round(firstTop)) perRow++;
+    else break;
+  }
+  if(perRow === 0 || items.length <= perRow * maxRows) return;
+
+  const cutoffItem = items[perRow * maxRows];
+  const rowGap = parseFloat(getComputedStyle(grid).rowGap) || 0;
+  const maxHeight = cutoffItem.offsetTop - rowGap / 2;
+
+  grid.style.maxHeight = maxHeight + "px";
+  grid.style.overflowY = "auto";
 }
 
 function updateGridMinHeight(){
@@ -484,6 +635,7 @@ function updateGridMinHeight(){
     ? visible.map(a => appTile(a)).join("")
     : `<div class="empty-msg">No apps found</div>`;
   grid.style.minHeight = grid.scrollHeight + "px";
+  applyRowScroll(grid, 4);
 }
 
 function renderMain(){
@@ -506,60 +658,144 @@ window.addEventListener("resize", ()=>{
   resizeTimer = setTimeout(()=>{
     updateGridMinHeight();
     renderMain();
+    closeArchivePopover();
   }, 150);
 });
 
-function renderArchive(){
-  const grid = document.getElementById("archiveGrid");
-  const items = APPS.filter(a => archived.includes(a.id));
-  grid.innerHTML = items.map(a => appTile(a, { removable:true })).join("");
+/* ===== Archive popover (Open / Remove) — fixed position, sideways of the row ===== */
+const archivePopover = document.getElementById("archivePopover");
+let activePopoverId = null;
+let activePopoverRow = null;
 
-  grid.querySelectorAll(".remove-badge").forEach(btn=>{
-    btn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      const id = btn.getAttribute("data-id");
+function closeArchivePopover(){
+  archivePopover.classList.remove("open");
+  if(activePopoverRow) activePopoverRow.classList.remove("show-dots");
+  activePopoverId = null;
+  activePopoverRow = null;
+}
+
+function openArchivePopover(dotsEl, row, id){
+  activePopoverId = id;
+  activePopoverRow = row;
+  row.classList.add("show-dots");
+  archivePopover.classList.add("open");
+
+  const dotsRect = dotsEl.getBoundingClientRect();
+  const popRect = archivePopover.getBoundingClientRect();
+  const gap = 8;
+  const vpW = window.innerWidth;
+  const vpH = window.innerHeight;
+
+  /* Prefer placing it to the right of the row (sideways, never on top of the app) */
+  let left = dotsRect.right + gap;
+  if(left + popRect.width > vpW - 8){
+    left = dotsRect.left - popRect.width - gap;
+  }
+  left = Math.max(8, Math.min(left, vpW - popRect.width - 8));
+
+  let top = dotsRect.top - 4;
+  if(top + popRect.height > vpH - 8){
+    top = vpH - popRect.height - 8;
+  }
+  top = Math.max(8, top);
+
+  archivePopover.style.left = left + "px";
+  archivePopover.style.top = top + "px";
+}
+
+archivePopover.querySelectorAll("button").forEach(btn=>{
+  btn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const action = btn.getAttribute("data-action");
+    const id = activePopoverId;
+    const app = APPS.find(a => a.id === id);
+
+    if(action === "open" && app){
+      window.open(app.url, "_blank", "noopener");
+      closeArchivePopover();
+    } else if(action === "remove" && id){
       archived = archived.filter(x => x !== id);
       saveArchived();
+      closeArchivePopover();
       renderArchive();
       updateGridMinHeight();
       renderMain();
+    }
+  });
+});
+
+function renderArchive(){
+  const list = document.getElementById("archiveList");
+  const items = APPS.filter(a => archived.includes(a.id));
+  closeArchivePopover();
+  list.innerHTML = items.length
+    ? items.map(a => archiveRow(a)).join("")
+    : `<div class="empty-archive">No archived apps</div>`;
+
+  list.querySelectorAll("[data-dots]").forEach(dots=>{
+    dots.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const row = dots.closest(".archive-row");
+      const id = dots.getAttribute("data-id");
+      if(activePopoverId === id && archivePopover.classList.contains("open")){
+        closeArchivePopover();
+      } else {
+        openArchivePopover(dots, row, id);
+      }
     });
   });
 }
 
+document.addEventListener("click", (e)=>{
+  if(e.target.closest(".archive-popover") || e.target.closest("[data-dots]")) return;
+  closeArchivePopover();
+});
+window.addEventListener("scroll", closeArchivePopover, true);
+
 /* Sidebar */
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
+const sidebarMenuView = document.getElementById("sidebarMenuView");
+const sidebarArchiveView = document.getElementById("sidebarArchiveView");
+
+function showSidebarView(view){
+  if(view === "archive"){
+    sidebarMenuView.style.display = "none";
+    sidebarArchiveView.style.display = "flex";
+    renderArchive();
+  } else {
+    sidebarArchiveView.style.display = "none";
+    sidebarMenuView.style.display = "flex";
+    closeArchivePopover();
+  }
+}
+
 document.getElementById("hamburgerBtn").addEventListener("click", ()=>{
+  showSidebarView("menu");
   sidebar.classList.add("open");
   overlay.classList.add("open");
 });
 overlay.addEventListener("click", ()=>{
   sidebar.classList.remove("open");
   overlay.classList.remove("open");
+  closeArchivePopover();
 });
 
-/* Archive panel */
-const archivePanel = document.getElementById("archivePanel");
-const fabBtn = document.getElementById("fabBtn");
+/* Archive now opens *within* the left sidebar — no right-hand screen */
 document.getElementById("archiveNavBtn").addEventListener("click", ()=>{
-  sidebar.classList.remove("open");
-  overlay.classList.remove("open");
-  renderArchive();
-  archivePanel.classList.add("open");
-  fabBtn.style.display = "flex";
+  showSidebarView("archive");
 });
 document.getElementById("archiveBackBtn").addEventListener("click", ()=>{
-  archivePanel.classList.remove("open");
-  fabBtn.style.display = "none";
+  showSidebarView("menu");
 });
 
 /* Picker modal */
 const modalOverlay = document.getElementById("modalOverlay");
 let selectedForArchive = [];
 
-fabBtn.addEventListener("click", ()=>{
+document.getElementById("archiveAddBtn").addEventListener("click", ()=>{
   selectedForArchive = [];
   const available = APPS.filter(a => !archived.includes(a.id));
   const list = document.getElementById("pickerList");
@@ -600,6 +836,12 @@ document.getElementById("modalDoneBtn").addEventListener("click", ()=>{
 
 modalOverlay.addEventListener("click", (e)=>{
   if(e.target === modalOverlay) modalOverlay.classList.remove("open");
+});
+
+/* Brand link: behaves like a reload (same tab), never opens a new tab */
+document.getElementById("brandLink").addEventListener("click", (e)=>{
+  e.preventDefault();
+  window.location.reload();
 });
 
 updateGridMinHeight();
