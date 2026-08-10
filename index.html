@@ -560,7 +560,7 @@ a{text-decoration:none;color:inherit}
 
 <script>
 const APPS = [
-  { id:"details-copy",   name:"Details Copy",     url:"https://kariyala.github.io/details-copy/" },
+  { id:"details-copy",   name:"Details Copy",     url:"https://kariyala.github.io/details-copy/", icon:"https://kariyala.github.io/details-copy/details1.png" },
   { id:"price-per-unit", name:"Price Per Unit",   url:"https://kariyala.github.io/price-per-unit/" },
   { id:"hst",            name:"HST",              url:"https://kariyala.github.io/hst/" },
   { id:"calculator-h",   name:"Calculator-H",     url:"https://kariyala.github.io/calculator-h/" },
@@ -582,11 +582,17 @@ function colorFor(id){
 let archived = JSON.parse(localStorage.getItem("mk_archived") || "[]");
 function saveArchived(){ localStorage.setItem("mk_archived", JSON.stringify(archived)); }
 
+function iconTileInner(app){
+  return app.icon
+    ? `<img src="${app.icon}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+    : app.name.charAt(0).toUpperCase();
+}
+
 function appTile(app){
   return `
     <div class="app">
       <a href="${app.url}" target="_blank">
-        <div class="icon-tile" style="background:${colorFor(app.id)}">${app.name.charAt(0).toUpperCase()}</div>
+        <div class="icon-tile" style="background:${app.icon ? 'transparent' : colorFor(app.id)}">${iconTileInner(app)}</div>
         <div class="app-label">${app.name}</div>
       </a>
     </div>`;
@@ -595,7 +601,7 @@ function appTile(app){
 function archiveRow(app){
   return `
     <div class="archive-row" data-id="${app.id}">
-      <div class="icon-tile-sm" style="background:${colorFor(app.id)}">${app.name.charAt(0).toUpperCase()}</div>
+      <div class="icon-tile-sm" style="background:${app.icon ? 'transparent' : colorFor(app.id)}">${iconTileInner(app)}</div>
       <div class="archive-row-name">${app.name}</div>
       <div class="archive-dots" data-dots data-id="${app.id}" aria-label="Options">
         <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
@@ -803,7 +809,7 @@ document.getElementById("archiveAddBtn").addEventListener("click", ()=>{
   list.innerHTML = available.length
     ? available.map(a => `
         <div class="picker-row" data-id="${a.id}">
-          <div class="picker-icon" style="background:${colorFor(a.id)}">${a.name.charAt(0).toUpperCase()}</div>
+          <div class="picker-icon" style="background:${a.icon ? 'transparent' : colorFor(a.id)}">${iconTileInner(a)}</div>
           <div class="picker-name">${a.name}</div>
           <div class="picker-check"></div>
         </div>`).join("")
